@@ -1,0 +1,12 @@
+from django.urls import path
+from . import views
+from .views import searchBook
+
+urlpatterns = [
+    path('signUp',views.signUp, name='signUp'),
+    path('adminpage', views.adminpage,name ='adminpage'),
+    path('userpage', views.userpage,name ='userpage'),
+    path('searchAPI/', searchBook.as_view(), name='api_search'),
+    path('search', views.search, name='search'),
+    path('showCategory', views.category, name='category'),
+]
