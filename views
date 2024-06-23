@@ -1,0 +1,74 @@
+from django.shortcuts import render, redirect
+from .models import User
+from .models import Add_Book
+from rest_framework import generics
+from .serializers import serBook
+
+# Create your views here.
+
+def signUp(request):
+    error_message = ' ' 
+    userName = ''
+    passWord = ''
+    passwordConfirm = ''
+    Email = ''
+    userType = ''
+    if request.method == 'POST':
+      userName= request.POST.get('uname', '')
+      passWord=request.POST.get('pword', '')
+      passwordConfirm = request.POST.get('cpword', '')
+      Email = request.POST.get('email', '')
+      userType= request.POST.get('user-type', '')
+      if userType == 'Admin':
+            admin_value = True
+      else:
+            admin_value = False
+      if not userName.strip() or not passWord.strip() or not Email.strip() or not userType:
+            error_message = "Please fill all fields."
+      elif passWord != passwordConfirm:
+            error_message = "Passwords don't match."
+      else:
+            if userType == 'Admin':
+                redirect_url = 'adminpage'
+            else:
+                redirect_url = 'userpage'
+            data=User(username=userName, password=passWord, email=Email, admin=admin_value)
+            data.save()
+            return redirect(redirect_url)
+    info={
+        'message': error_message,
+        'uname': userName,
+        'pword': passWord,
+        'cpword': passwordConfirm,
+        'email': Email,
+        'user_type': userType
+    }
+    return render(request, 'sign up/signup.html', info)
+
+def adminpage(request):
+    return render(request,'admin page/Home_NavigationBar.html')
+
+def userpage(request):
+    return render(request,'user page/user_page.html')
+def category(request):
+    return render(request,'catogory/catogory.html')
+
+class searchBook(generics.ListAPIView):
+    serializer_class = serBook
+
+    def get_queryset(self):
+        queryset = Add_Book.objects.all()
+        title = self.request.query_params.get('title', None)
+        author = self.request.query_params.get('author', None)
+        category = self.request.query_params.get('category', None)
+        if title:
+            queryset = queryset.filter(Book_Name__icontains=title)
+        if author:
+            queryset = queryset.filter(Author__icontains=author)
+        if category:
+            queryset = queryset.filter(Category__icontains=category)
+        return queryset
+
+
+def search(request):
+    return render(request, 'serach page/search.html')
